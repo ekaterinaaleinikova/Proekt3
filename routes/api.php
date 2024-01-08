@@ -20,9 +20,9 @@ Route::post("/category", [CategoriesController::class, 'create']);
 Route::put("/category", [CategoriesController::class, 'update']); 
 Route::delete("/category/{id}", [CategoriesController::class, 'delete']); 
 
-Route::get("/products", [ProductsController::class, 'create_list']); 
-Route::post("/products", [ProductsController::class, 'create']); 
-Route::delete("/products/{id}", [ProductsController::class, 'delete']); 
+Route::get("/product", [ProductsController::class, 'create_list']); 
+Route::post("/product", [ProductsController::class, 'create']); 
+Route::delete("/product/{id}", [ProductsController::class, 'delete']); 
 
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
