@@ -1,4 +1,4 @@
-<?php
+<?php 
 
 namespace App\Http\Controllers;
 
@@ -13,8 +13,6 @@ class ProductsController extends Controller
         $products->name = $request->name;
         $products->price = $request->price;  
         $products->description = $request->description; 
-        $products->stock_quantity = $request->stock_quantity; 
-        $products->category_id = $request->category_id; 
         $products->save();
         
         return $products;  // Returning the created categories
