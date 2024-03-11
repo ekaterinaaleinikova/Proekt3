@@ -81,4 +81,118 @@ class ProductsControllerTest extends TestCase
     //     $response->assertOk()
     //         ->assertHeader('Content-Type', 'image/img');
     // }
+
+    
+    public function testProductsByNonExistingCategory()
+    {
+        $category_id = 999; // Предположим, что 999 - это ID несуществующей категории
+        $response = $this->getJson("api/product/{$category_id}");
+    
+        $response->assertStatus(404); // Обновим ожидаемый статус кода до 404
+        $response->assertJson([
+            'message' => "Category with ID $category_id does not exist."
+        ]);
+    }
+    
+
+
+    public function testGetImage()
+    {
+        $product = Product::factory()->create([
+            'image' => 'storage/image/img/test.jpg',
+        ]);
+
+        $response = $this->get('/product/image/' . basename($product->image));
+
+        $response->assertOk()
+            ->assertHeader('Content-Type', 'image/img');
+    }
+
+    public function testCreateProductWithoutPrice()
+    {
+        $response = $this->post("api/product", [
+            'name' => 'Test Product',
+            'description' => 'Test description',
+            'category_id' => 5,
+            'photo' => UploadedFile::fake()->image('test.jpg'),
+        ]);
+
+        $response->assertSessionHasErrors('price');
+    }
+
+    // public function testCreateProductWithoutCategory()
+    // {
+    //     $response = $this->post("api/product", [
+    //         'name' => 'Test Product',
+    //         'price' => 100,
+    //         'description' => 'Test description',
+    //         'photo' => UploadedFile::fake()->image('test.jpg'),
+    //         'category_id' => 4
+    //     ]);
+
+    //     $response->assertSessionHasErrors('category_id');
+    // }
+
+    // public function testCreateProductWithInvalidCategory()
+    // {
+    //     $response = $this->post("api/product", [
+    //         'name' => 'Test Product',
+    //         'price' => 100,
+    //         'description' => 'Test description',
+    //         'category_id' => 999, // Assuming 999 is an invalid category ID
+    //         'photo' => UploadedFile::fake()->image('test.jpg'),
+    //     ]);
+
+    //     $response->assertSessionHasErrors('category_id');
+    // }
+
+    public function testDeleteProductWithImage()
+    {
+        $product = Product::factory()->create();
+        $response = $this->delete("api/product/{$product->id}");
+        $response->assertOk();
+        $this->assertNull(Product::find($product->id));
+        $this->assertFalse(Storage::exists("public/{$product->image}"));
+    }
+
+    public function testDeleteProductWithInvalidId()
+    {
+        $response = $this->delete("api/product/999"); // Assuming 999 is an invalid product ID
+        $response->assertNotFound();
+    }
+
+    public function testGetImageForNonExistingProduct()
+    {
+        $response = $this->get('api/product/image/nonexistent.jpg');
+        $response->assertNotFound();
+    }
+
+    // public function testGetImageForProductWithoutImage()
+    // {
+    //     $product = Product::factory()->create(['image' => null]);
+    //     $response = $this->get("api/product/image/{$product->image}");
+    //     $response->assertNotFound();
+    // }
+
+    public function testGetImageForProductWithInvalidImage()
+    {
+        $response = $this->get('api/product/image/invalid.jpg'); // Assuming invalid.jpg does not exist
+        $response->assertNotFound();
+    }
+
+    public function testGetImageForProductWithValidImage()
+    {
+        $product = Product::factory()->create(['image' => 'storage/image/img/test.jpg']);
+        $response = $this->get("api/product/image/{$product->image}");
+        $response->assertOk()->assertHeader('Content-Type', 'image/img');
+    }
+
+    public function testGetImageForProductWithInvalidExtension()
+    {
+        $product = Product::factory()->create(['image' => 'storage/image/img/test.txt']);
+        $response = $this->get("api/product/image/{$product->image}");
+        $response->assertNotFound();
+    }
+    
+
 }

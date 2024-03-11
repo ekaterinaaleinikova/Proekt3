@@ -20,9 +20,6 @@ class OrderController extends Controller
             $order->total_price = (float) $request->product_price * $request->count;
             $order->status_id = Status::CREATED;
             $order->save();
-
-            return response()->json(['message' => 'Новый заказ успешно создан', 'order_id' => $order->id, 'total_price' => $order->total_price]);
-
         }
 
         $product = Product::find($request->product_id);
@@ -30,15 +27,14 @@ class OrderController extends Controller
         if (!$product) {
             return response()->json(['message' => 'Товар не найден'], 404);
         }
-
         $item = OrderItem::create([
             'order_id' => $order->id,
             'product_id' => $product->id,
-            'price' => $product->price,
-            'count' => $request->count,
+            'price' => (float)$product->price,
+            'count' => 1,
         ]);
 
-        return response()->json(['message' => 'Товар успешно добавлен в корзину', 'item' => $item]);
+        return response()->json(['message' => 'Товар успешно добавлен в корзину', 'data' => $item]);
     }
 
 
@@ -66,9 +62,9 @@ class OrderController extends Controller
 
     public function show($id)
     {
-        $order = Order::findOrFail($id);
-        $orderItems = OrderItem::where('order_id', $order->id)->get();
+        $order = Order::where('id',$id)->with('items');
+        // $orderItems = OrderItem::where('order_id', $order->id)->get();
 
-        return view('orders.show', compact('order', 'orderItems'));
+        return response()->json($order);
     }
 }

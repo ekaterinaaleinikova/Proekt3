@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 
 class Order extends Model
 {
+    protected $fillable = ['id', 'total_price', 'status_id'];
     use HasFactory;
 
     public function items(){
