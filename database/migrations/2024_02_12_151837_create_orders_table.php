@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateOrdersTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->decimal('total_price', 8, 2)->change();
+            $table->decimal('total_price', 8, 2);
             $table->integer('status_id')->default(1);
             $table->timestamps();
         });
@@ -27,3 +27,4 @@ return new class extends Migration
         Schema::dropIfExists('orders');
     }
 };
+

@@ -37,24 +37,74 @@ class CategoriesControllerTest extends TestCase
         $response->assertJsonFragment(['name' => 'Test Category']);
     }
 
-    // public function testGetImage()
-    // {
-    //     // Creating a fake category with an image for testing
-    //     $category = Categories::factory()->create([
-    //         'name' => 'Test Category',
-    //         'image' => 'storage/image/test.jpg', // adjust the path based on your storage configuration
-    //     ]);
+    public function testDeleteCategory(): void
+    {
+        $response = $this->delete("api/category/6");
 
-    //     // Sending a request to get the image
-    //     $response = $this->get("api/category/image/img/{$category->image}");
+        $response->assertStatus(200);
+    }
 
-    //     // Asserting a successful response
-    //     $response->assertStatus(200);
+    public function testCreateCategoryWithoutName()
+    {
+        $response = $this->post('api/category', [
+            'photo' => UploadedFile::fake()->image('test.jpg'),
+        ]);
 
-    //     // Asserting that the response has the correct content type header
-    //     $response->assertHeader('Content-Type', 'image/img');
-    // }
+        // Updated expectation to handle the redirect
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('name');
+    }
+
+
+    public function testCreateCategoryWithoutPhoto()
+    {
+        $response = $this->post('api/category', [
+            'name' => 'Category Without Photo',
+        ]);
+
+        $response->assertStatus(302);
+        $response->assertSessionHasErrors('photo');
+    }
+
+
+    public function testDeleteNonExistingCategory()
+    {
+        $response = $this->delete("api/category/999");
+        $response->assertStatus(200);
+        $response->assertSeeText('Categories with ID 999 was not found.');
+    }
+
+
+    public function testDeleteCategoryWithImage()
+    {
+        $category = Categories::find(156);
+        $response = $this->delete("api/category/{$category->id}");
+        $response->assertStatus(200);
+        $response->assertSeeText("Categories with ID {$category->id} has been deleted.");
+        $this->assertFalse(Storage::exists("public/{$category->image}"));
+    }
+
+
+    public function testGetImageNonExisting()
+    {
+        $response = $this->get('api/category/image/nonexistent.jpg');
+        $response->assertStatus(404);
+        $response->assertSeeText('Not Found');
+    }
+
+
+
+
+    public function testGetExistingImage()
+    {
+        $category = Categories::find(156);
+        $response = $this->get("api/category/image/{$category->image}");
+        $response->assertStatus(404);
+    }
+
 }
+
+
 
 
 
